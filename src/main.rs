@@ -28,6 +28,7 @@ fn main() {
 
     // @TODO: add each day in here
     methods.insert("1".to_string(), advent::day1::day1);
+    methods.insert("2".to_string(), advent::day2::day2);
 
 
     let mut input: String = "".to_string();
