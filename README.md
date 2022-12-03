@@ -12,3 +12,9 @@ To run this repo (and thus the code challenge solutions):
 4. Run (and compile) the code for a given day:
 
 `cargo run -- --day 1 --input-file ./src/inputs/day1.txt`
+
+You can ignore the second param (`input-file`) and the script will look for a "dayX.txt" file in the `src/inputs` directory. This is just a shortcut.
+
+`cargo run -- --day 1`
+
+The two commands above are equivalent.
