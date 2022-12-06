@@ -8,3 +8,5 @@ edition = "2021"
 [dependencies]
 clap = { version = "4.0", features = ["derive"] }
 automod = "1.0.3"
+regex = "1"
+itertools = "0.10.5"
