@@ -36,6 +36,7 @@ fn main() {
     methods.insert("6".to_string(), advent::day6::day6);
     methods.insert("7".to_string(), advent::day7::day7);
     methods.insert("8".to_string(), advent::day8::day8);
+    methods.insert("9".to_string(), advent::day9::day9);
 
 
     let day_input_path = format!("{}{}{}", "./src/inputs/day", cli.day, ".txt");
