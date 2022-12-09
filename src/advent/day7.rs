@@ -65,13 +65,36 @@ pub fn day7(input: String) {
 
     // println!("dir sizes: {:?}", dir_sizes);
     let mut small_dir_total = 0;
-    for (d,s) in dir_sizes {
-        if s < 100000 {
+    for (d,s) in &dir_sizes {
+        if s < &100000 {
             small_dir_total += s;
         }
     }
 
     println!("Part 1 answer: {:?}", small_dir_total);
+
+    let root = dir_sizes.get("/");
+    match root {
+        Some(size) => {
+            let free = 70000000 - size;
+            let min_del = 30000000 - free;
+            println!("must free up {:?}", min_del);
+
+            let mut min_diff: u32 = 99999999;
+            let mut del_size: u32 = 0;
+            for (d,s) in &dir_sizes {
+                if s >= &min_del && (s - min_del) < min_diff {
+                    min_diff = (s - min_del);
+                    del_size = *s;
+                }
+            }
+
+            println!("Part 2: smallest directory size to delete: {:?} (diff: {:?})", del_size, min_diff);
+        },
+        None => {}
+    }
+
+
 }
 
 
