@@ -40,7 +40,11 @@ pub fn day11(input: String) {
         if String::from(line).starts_with("  Starting items") {
             let items = line.split(": ").collect::<Vec<&str>>()[1].split(", ").collect::<Vec<&str>>();
             for i in items {
-                curr_monkey.items.push(String::from(i).parse::<u128>().unwrap())
+                // Only store the modulo since we only care about the divisibility
+                // solves part 2 overflows
+                let mut item = String::from(i).parse::<u128>().unwrap();
+                // item = item % curr_monkey.test;
+                curr_monkey.items.push(item);
             }
         }
 
@@ -64,12 +68,13 @@ pub fn day11(input: String) {
     }
 
     // Run through the rounds of turns...
-    // Part 1 = 20 rounds
-    // Part 2 = 10000 rounds
-    let rounds: u16 = 20;
-    // Part 1 = 3
-    // Part 2 = 1 (no drop)
-    let worry_drop: u128 = 3;
+    // Part 1 = 20 rounds, divisor = 3
+    // Part 2 = 10000 rounds, divisor = 1
+    let rounds: u16 = 10000;
+    let worry_div: u128 = 1;
+
+    // Get the factorial so we can use a least common multiplier for storage later
+    let factor: u128 = monkeys.iter().map(|m| m.test).product();
 
     for r in (0..rounds) {
         for i in (0..monkeys.len()) {
@@ -77,8 +82,12 @@ pub fn day11(input: String) {
             for item in monkey_edit[i].items.clone() {
                 let mut new_item = calc_worry(item, &monkey_edit[i].op);
                 // Part 1
-                new_item = (((new_item / worry_drop) as f64).floor() as u128);
+                new_item = (((new_item / worry_div) as f64).floor() as u128);
                 
+                // Only store the modulo with the LCM since we only care about the divisibility
+                // solves part 2 overflows
+                new_item = new_item % factor;
+
                 let mut other_monkey = monkey_edit[i].false_dest;
                 if new_item % monkey_edit[i].test == 0 {
                     other_monkey = monkey_edit[i].true_dest;
@@ -93,16 +102,17 @@ pub fn day11(input: String) {
     }
 
     println!("*** Monkeys after {:?} rounds", rounds);
-    let mut inspect_counts: Vec<u32> = Vec::new();
+    let mut inspect_counts: Vec<u128> = Vec::new();
     for m in &monkeys {
         println!("{:?}", m);
-        inspect_counts.push(m.inspect_count);
+        inspect_counts.push(m.inspect_count as u128);
     }
     inspect_counts.sort();
     inspect_counts = inspect_counts.into_iter().rev().collect();
     println!("inspect counts sorted: {:?}", inspect_counts);
 
-    println!("Part 1 answer: {:?}", inspect_counts[0] * inspect_counts[1]);
+    let monkey_biz:u128 = inspect_counts[0] * inspect_counts[1];
+    println!("Part 1 answer: {:?}", monkey_biz);
 
 }
 
