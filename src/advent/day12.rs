@@ -10,11 +10,8 @@ struct Spot {
 }
 
 pub fn day12(input: String) {
-    let heights = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
 
     let mut map: Vec<Vec<char>> = Vec::new();
-    let mut unvisited: HashMap<String, Spot> = HashMap::new();
-    let mut visited: HashMap<String, Spot> = HashMap::new();
     let mut end: (usize, usize) = (0,0);
     let mut start: (usize, usize) = (0,0);
 
@@ -38,7 +35,101 @@ pub fn day12(input: String) {
     }
 
     // println!("Map: {:?}", map);
+
+    // Part 1
+    println!("PART 1");
+    calc_path(map.clone(), &start, &end);
+
+    // Part 2
+    println!("\nPART 2");
+    rev_path(map.clone(), &end);
+}
+
+fn rev_path(map: Vec<Vec<char>>, start: &(usize, usize)) {
+    println!("Going from {:?} to any 'a'", start);
+
+    let heights = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+    let mut unvisited: HashMap<String, Spot> = HashMap::new();
+
+    for y in (0..map.len()) {
+        for x in (0..map[0].len()) {
+            let h_val = heights.iter().position(|&v| v == map[y][x]).unwrap();
+
+            let mut neighbors = Vec::new();
+
+            if is_rev_neighbor(&map, h_val, (y as i16, (x+1) as i16)) {  // look right
+                neighbors.push(format!("{},{}", y, x+1));
+            }
+            if is_rev_neighbor(&map, h_val, (y as i16, (x as i16)-1)) {  // look left
+                neighbors.push(format!("{},{}", y, x-1));
+            }
+            if is_rev_neighbor(&map, h_val, ((y as i16)-1, x as i16)) {  // look up
+                neighbors.push(format!("{},{}", y-1, x));
+            }
+            if is_rev_neighbor(&map, h_val, ((y+1) as i16, x as i16)) {  // look down
+                neighbors.push(format!("{},{}", y+1, x));
+            }
+
+            let dist: u16 = if y==start.0 && x==start.1 { 0 } else { 9998 };
+            let s = Spot {
+                loc: [y, x],
+                neighbors,
+                dist,
+                is_end: map[y][x] == 'a'
+            };
+            unvisited.insert(format!("{},{}", y, x), s);
+        }
+    }
+
+    // println!("Unvisited: {:?}", unvisited["2,5"]);
+    // println!("Unvisited: {:?}", unvisited["2,4"]);
+
+    let mut paths: Vec<(String, u16)> = Vec::new();
+    let mut curr_spot = unvisited[&format!("{},{}", start.0, start.1)].clone();
+
+    while unvisited.len() > 0 {
+        curr_spot = unvisited[&get_min_dist(&unvisited)].clone();
+        // println!("Now processing spot: {:?} with dist {:?}", curr_spot.loc, curr_spot.dist);
+
+        for n_id in &curr_spot.neighbors {
+            if unvisited.contains_key(n_id) {
+                let id = String::from(n_id);
+                if unvisited[&id].dist > (curr_spot.dist + 1) {
+                    unvisited.entry(id).and_modify(|s| {
+                        s.dist = curr_spot.dist + 1;
+                        // println!("Modified neighbor {:?} with new dist {:?}", s.loc, s.dist);
+                    });
+                }
+            }
+        }
+        unvisited.remove(&format!("{},{}", curr_spot.loc[0], curr_spot.loc[1]));
+        if curr_spot.is_end {
+            // println!("Reached an end at {:?} with min dist {:?}", curr_spot.loc, curr_spot.dist);
+            paths.push((format!("{},{}", curr_spot.loc[0], curr_spot.loc[1]), curr_spot.dist));
+        }
+    }
+
+    paths.sort_by(|a, b| a.1.cmp(&b.1));
+    println!("Minimum path starts from {:?} and is {:?} steps", paths[0].0, paths[0].1);
+}
+
+fn is_rev_neighbor(map: &Vec<Vec<char>>, h: usize, pos: (i16, i16)) -> bool {
+    let heights = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+    if pos.0 >= 0 && pos.0 < (map.len() as i16) && pos.1 >= 0 && pos.1 < (map[0].len() as i16) {
+        let n_val: i16 = heights.iter().position(|&v| v == map[pos.0 as usize][pos.1 as usize]).unwrap() as i16;
+        if (h as i16) <= (n_val+1) {
+            return true;
+        }
+    }
+    return false;
+}
+
+
+fn calc_path(map: Vec<Vec<char>>, start: &(usize, usize), end: &(usize, usize)) {
     println!("Going from {:?} to {:?}", start, end);
+
+    let heights = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
+    let mut unvisited: HashMap<String, Spot> = HashMap::new();
 
     for y in (0..map.len()) {
         for x in (0..map[0].len()) {
@@ -91,11 +182,10 @@ pub fn day12(input: String) {
         }
         unvisited.remove(&format!("{},{}", curr_spot.loc[0], curr_spot.loc[1]));
         if curr_spot.loc[0] == end.0 && curr_spot.loc[1] == end.1 {
-            println!("Part 1: Reached the end with min dist {:?}", curr_spot.dist);
+            println!("Reached the end with min dist {:?}", curr_spot.dist);
             break;
         }
     }
-
 }
 
 fn is_neighbor(map: &Vec<Vec<char>>, h: usize, pos: (i16, i16)) -> bool {
