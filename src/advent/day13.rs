@@ -1,9 +1,11 @@
+use std::{cmp::Ordering, ops::Index};
+
 
 pub fn day13(input: String) {
     
     let no_tens = input.replace("10", "a");
     let pairs = no_tens.split("\n\n").collect::<Vec<&str>>();
-    let mut ordered: Vec<usize> = Vec::new();
+    let mut ordered_indices: Vec<usize> = Vec::new();
 
     for (i, block) in pairs.iter().enumerate() {
         let pair = String::from(*block);
@@ -11,12 +13,37 @@ pub fn day13(input: String) {
         // println!("pair: {:?}", pair);
 
         if is_ordered(pair[0].as_bytes(), pair[1].as_bytes()) {
-            ordered.push(i+1);
+            ordered_indices.push(i+1);
         }
     }
+    // println!("ordered indices: {:?}", ordered_indices);
+    println!("Part 1 answer: {:?}", ordered_indices.iter().sum::<usize>());
 
-    println!("ordered indices: {:?}", ordered);
-    println!("Part 1 answer: {:?}", ordered.iter().sum::<usize>());
+
+    // Part 2
+
+    let mut packets = no_tens
+        .split("\n")
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<&str>>();
+    // add the divider packets
+    packets.push("[[2]]");
+    packets.push("[[6]]");
+
+
+    packets.sort_by(|a, b| {
+        if is_ordered(a.as_bytes(), b.as_bytes()) {
+            return Ordering::Less
+        } else {
+            return Ordering::Greater
+        }
+    });
+
+    // println!("sorted packets: {:?}", packets);
+
+    let div_2_i = packets.iter().position(|&v| v == "[[2]]").unwrap() + 1;
+    let div_6_i = packets.iter().position(|&v| v == "[[6]]").unwrap() + 1;
+    println!("Part 2 answer: {:?}", div_2_i * div_6_i);
 
 }
 
